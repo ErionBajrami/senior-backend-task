@@ -23,7 +23,7 @@ Node 22 has fully native ES modules; Node 24 will be LTS later in 2026. We need 
 **Positive**
 
 - `exactOptionalPropertyTypes` caught a real bug in the HTTP controller before it shipped: passing Zod-parsed `string | undefined` straight into a use case input typed `?: string` is rejected (the use case would have silently treated `undefined` as a value rather than as "field missing").
-- `noUncheckedIndexedAccess` makes array/map access return `T | undefined`. Verbose, but it caught one off-by-one in the FakeTokenVerifier during the application-layer tests.
+- `noUncheckedIndexedAccess` makes array/map access return `T | undefined`. Verbose, but it forces every indexed access to guard the missing-key case explicitly.
 - ESM-native means no `__dirname` shims; we use `import.meta.url` where needed.
 
 **Negative**

@@ -35,7 +35,7 @@ Specifically:
 
 - Reviewer can verify the architecture in one glance: `eslint.config.js` declares the rules, `npm run lint` enforces them, `compose.ts` is the only place adapters get wired.
 - Swapping infrastructure (e.g. Mongo → Postgres, Fastify → Hono, JWT → opaque sessions) is a one-file change in `src/infrastructure/` plus a few lines in `compose.ts`. Neither domain nor application moves.
-- Use cases are unit-testable with hand-rolled fakes (no mocks, no DI container) — the test suite at `test/unit/application/__fakes__/` shows this in practice.
+- Use cases are unit-testable with hand-rolled fakes (no mocks, no DI container): every dependency is an interface in `src/application/ports/out/` that a fake can implement directly.
 
 **Negative**
 
