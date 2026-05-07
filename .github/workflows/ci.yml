@@ -89,7 +89,7 @@ jobs:
           format: sarif
           output: trivy-fs.sarif
           skip-dirs: 'deploy/k8s'
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: trivy-fs.sarif
@@ -148,16 +148,18 @@ jobs:
       security-events: write
       actions: read
     steps:
+      - name: lowercase image name
+        run: echo "IMAGE_NAME_LC=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
       - name: trivy image scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-image.outputs.digest }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}@${{ needs.build-image.outputs.digest }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '0'
           format: sarif
           output: trivy-image.sarif
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: trivy-image.sarif
