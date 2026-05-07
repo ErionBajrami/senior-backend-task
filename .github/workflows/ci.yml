@@ -81,6 +81,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -166,6 +167,7 @@ jobs:
       contents: read
       packages: read
       security-events: write
+      actions: read
     steps:
       - name: trivy image scan
         uses: aquasecurity/trivy-action@master
