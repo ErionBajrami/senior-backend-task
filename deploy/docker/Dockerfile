@@ -1,4 +1,3 @@
-# trivy:ignore:DS-0026
 FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -38,5 +37,8 @@ ENV NODE_ENV=production
 EXPOSE 3000 3001
 
 USER 65532:65532
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
+  CMD ["/nodejs/bin/node", "-e", "fetch('http://localhost:3001/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
 
 ENTRYPOINT ["/usr/local/bin/tini", "--", "/nodejs/bin/node", "--enable-source-maps", "/app/dist/index.js"]
