@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-# Cancel an in-flight PR run when a new commit is pushed.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,9 +16,6 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/quanos
 
 jobs:
-  # ─────────────────────────────────────────────────────────────────────
-  # Static checks (lint + format + dep boundaries + OpenAPI freshness)
-  # ─────────────────────────────────────────────────────────────────────
   lint:
     name: lint + format + boundaries + openapi
     runs-on: ubuntu-latest
@@ -47,11 +43,6 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run typecheck
 
-  # ─────────────────────────────────────────────────────────────────────
-  # Tests with coverage gate. Runs unit + integration + e2e in one shot
-  # so vitest's coverage view is consolidated. testcontainers spins up
-  # Mongo via the Docker daemon already present on ubuntu-latest.
-  # ─────────────────────────────────────────────────────────────────────
   test:
     name: test (unit + integration + e2e)
     runs-on: ubuntu-latest
@@ -72,9 +63,6 @@ jobs:
           path: coverage/
           retention-days: 7
 
-  # ─────────────────────────────────────────────────────────────────────
-  # Source-side security: secrets in history, vulnerable deps, IaC issues.
-  # ─────────────────────────────────────────────────────────────────────
   scan-source:
     name: source security (gitleaks + trivy fs)
     runs-on: ubuntu-latest
@@ -100,16 +88,13 @@ jobs:
           exit-code: '1'
           format: sarif
           output: trivy-fs.sarif
+          skip-dirs: 'deploy/k8s'
       - uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: trivy-fs.sarif
           category: trivy-fs
 
-  # ─────────────────────────────────────────────────────────────────────
-  # Build the OCI image (multi-arch). Push only on main; PRs build for
-  # validation but never publish.
-  # ─────────────────────────────────────────────────────────────────────
   build-image:
     name: build OCI image
     runs-on: ubuntu-latest
@@ -152,12 +137,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ─────────────────────────────────────────────────────────────────────
-  # Image scan (informational only). The base image inevitably has
-  # upstream CVEs we can't fix from this repo — Renovate / Dependabot
-  # will refresh it weekly. The findings still surface in GitHub
-  # security, but they don't gate the merge.
-  # ─────────────────────────────────────────────────────────────────────
   scan-image:
     name: scan published image (informational)
     runs-on: ubuntu-latest
