@@ -56,11 +56,7 @@ interface JsonResponse {
   headers?: HeadersObject;
 }
 
-function jsonResponse(
-  description: string,
-  schema: z.ZodTypeAny,
-  headers?: HeadersObject,
-): JsonResponse {
+function jsonResponse(description: string, schema: z.ZodTypeAny, headers?: HeadersObject): JsonResponse {
   return {
     description,
     content: { 'application/json': { schema } },

@@ -11,10 +11,7 @@ export class ListAllLinks {
 
   async execute(opts?: ListOptions): Promise<ListLinksOutput> {
     if (opts?.limit !== undefined || opts?.offset !== undefined) {
-      const [items, total] = await Promise.all([
-        this.linkRepo.findAll(opts),
-        this.linkRepo.countAll(),
-      ]);
+      const [items, total] = await Promise.all([this.linkRepo.findAll(opts), this.linkRepo.countAll()]);
       return { items, total };
     }
     const items = await this.linkRepo.findAll();
