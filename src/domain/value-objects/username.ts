@@ -1,6 +1,5 @@
 import { InvalidUsernameError } from '../errors/invalid-username.error.js';
 
-
 export class Username {
   private static readonly MIN_LENGTH = 3;
   private static readonly MAX_LENGTH = 50;

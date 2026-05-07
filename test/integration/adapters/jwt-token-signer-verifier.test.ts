@@ -21,10 +21,7 @@ describe('JwtTokenSigner + JwtTokenVerifier (integration)', () => {
 
   beforeEach(() => {
     T0 = new Date();
-    signer = new JwtTokenSigner(
-      { secret: SECRET, ttlSeconds: 3600, issuer: ISSUER },
-      new FixedClock(T0),
-    );
+    signer = new JwtTokenSigner({ secret: SECRET, ttlSeconds: 3600, issuer: ISSUER }, new FixedClock(T0));
     verifier = new JwtTokenVerifier({ secret: SECRET, issuer: ISSUER });
   });
 
@@ -47,10 +44,7 @@ describe('JwtTokenSigner + JwtTokenVerifier (integration)', () => {
 
   it('rejects an expired token', async () => {
     const pastClock = new FixedClock(new Date(Date.now() - 1_000_000));
-    const pastSigner = new JwtTokenSigner(
-      { secret: SECRET, ttlSeconds: 1, issuer: ISSUER },
-      pastClock,
-    );
+    const pastSigner = new JwtTokenSigner({ secret: SECRET, ttlSeconds: 1, issuer: ISSUER }, pastClock);
     const { token } = await pastSigner.sign(AdminId.generate());
     expect(await verifier.verify(token)).toBeNull();
   });

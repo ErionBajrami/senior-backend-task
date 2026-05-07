@@ -22,7 +22,7 @@ export async function buildFastifyServer(config: FastifyServerConfig): Promise<F
 
   await registerSecurityPlugins(app, config.security);
   registerErrorHandler(app);
-  
+
   app.addHook('onSend', (req, reply, payload, done) => {
     reply.header(config.requestIdHeader, req.id);
     done(null, payload);

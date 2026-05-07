@@ -1,4 +1,3 @@
-
 export interface Identifiable<TId> {
   readonly id: TId;
 }

@@ -49,7 +49,7 @@ export async function registerRoutes(app: FastifyInstance, deps: RouteDeps): Pro
     createLink: deps.createLink,
     updateLink: deps.updateLink,
     deleteLink: deps.deleteLink,
-    
+
     authMiddleware: deps.authMiddleware,
   });
 }

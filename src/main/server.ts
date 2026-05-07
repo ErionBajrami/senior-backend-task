@@ -52,7 +52,7 @@ export async function startServer(env: Env): Promise<RunningApp> {
   const apiServer = await buildFastifyServer({
     loggerOptions,
     requestIdHeader: env.REQUEST_ID_HEADER,
-    
+
     security: {
       rateLimitMax: env.RATE_LIMIT_MAX,
       rateLimitTimeWindow: env.RATE_LIMIT_TIME_WINDOW,

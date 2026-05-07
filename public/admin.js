@@ -1,4 +1,3 @@
-
 'use strict';
 
 (function () {
@@ -37,9 +36,7 @@
     var data = null;
     try {
       data = await res.json();
-    } catch (e) {
-
-    }
+    } catch (e) {}
     if (!res.ok) {
       var err = new Error((data && data.message) || 'HTTP ' + res.status);
       err.status = res.status;

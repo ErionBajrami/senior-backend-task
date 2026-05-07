@@ -1,6 +1,5 @@
 import { InvalidDescriptionError } from '../errors/invalid-description.error.js';
 
-
 export class LinkDescription {
   private static readonly MAX_LENGTH = 2000;
 

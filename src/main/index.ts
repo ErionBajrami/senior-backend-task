@@ -1,7 +1,6 @@
 import { EnvValidationError, loadEnv } from '../infrastructure/config/env.js';
 import { startServer, type RunningApp } from './server.js';
 
-
 async function main(): Promise<void> {
   let env;
   try {

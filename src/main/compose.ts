@@ -29,7 +29,6 @@ import { VerifyAdminToken } from '../application/use-cases/verify-admin-token.us
 
 import { makeAuthMiddleware } from '../interfaces/http/middleware/auth.middleware.js';
 
-
 export interface ComposedApp {
   listActiveLinks: ListActiveLinks;
   getActiveLink: GetActiveLink;

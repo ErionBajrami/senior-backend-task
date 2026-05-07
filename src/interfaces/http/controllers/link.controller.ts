@@ -20,7 +20,6 @@ export interface PublicLinkControllerDeps {
   getActiveLink: GetActiveLink;
 }
 
-
 export function registerPublicLinkRoutes(app: FastifyInstance, deps: PublicLinkControllerDeps): void {
   app.get('/v1/links', async (): Promise<LinkListResponseDto> => {
     const links = await deps.listActiveLinks.execute();

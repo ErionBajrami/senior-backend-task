@@ -8,7 +8,6 @@ export interface OpsServerConfig {
   mongoTimeoutMs: number;
 }
 
-
 async function pingWithTimeout(client: MongoClient, ms: number): Promise<void> {
   await Promise.race([
     client.db().admin().ping(),
