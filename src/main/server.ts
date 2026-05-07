@@ -37,7 +37,7 @@ export async function startServer(env: Env): Promise<RunningApp> {
   await ensureIndexes(db);
   logger.info('mongo connected, indexes ensured');
 
-  const composed = composeApp({ db, env });
+  const composed = await composeApp({ db, env, logger });
 
   await seedAdmin({
     adminRepo: composed.adminRepo,

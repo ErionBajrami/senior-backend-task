@@ -10,6 +10,7 @@ import { presentLink, presentLinks } from '../presenters/link.presenter.js';
 import {
   CreateLinkBody,
   LinkIdParam,
+  LinkListQuery,
   UpdateLinkBody,
   type LinkListResponseDto,
   type LinkResponseDto,
@@ -21,9 +22,11 @@ export interface PublicLinkControllerDeps {
 }
 
 export function registerPublicLinkRoutes(app: FastifyInstance, deps: PublicLinkControllerDeps): void {
-  app.get('/v1/links', async (): Promise<LinkListResponseDto> => {
-    const links = await deps.listActiveLinks.execute();
-    return [...presentLinks(links)];
+  app.get('/v1/links', async (req, reply): Promise<LinkListResponseDto> => {
+    const query = LinkListQuery.parse(req.query);
+    const { items, total } = await deps.listActiveLinks.execute(query);
+    reply.header('x-total-count', total.toString());
+    return [...presentLinks(items)];
   });
 
   app.get('/v1/links/:id', async (req): Promise<LinkResponseDto> => {
@@ -45,9 +48,11 @@ export interface AdminLinkControllerDeps {
 export function registerAdminLinkRoutes(app: FastifyInstance, deps: AdminLinkControllerDeps): void {
   const opts = { preHandler: deps.authMiddleware };
 
-  app.get('/v1/admin/links', opts, async (): Promise<LinkListResponseDto> => {
-    const links = await deps.listAllLinks.execute();
-    return [...presentLinks(links)];
+  app.get('/v1/admin/links', opts, async (req, reply): Promise<LinkListResponseDto> => {
+    const query = LinkListQuery.parse(req.query);
+    const { items, total } = await deps.listAllLinks.execute(query);
+    reply.header('x-total-count', total.toString());
+    return [...presentLinks(items)];
   });
 
   app.get('/v1/admin/links/:id', opts, async (req): Promise<LinkResponseDto> => {

@@ -1,6 +1,6 @@
 import type { AdminRepository } from '../../domain/repositories/admin.repository.js';
 import { Username } from '../../domain/value-objects/username.js';
-import { PasswordHash } from '../../domain/value-objects/password-hash.js';
+import type { PasswordHash } from '../../domain/value-objects/password-hash.js';
 import { InvalidCredentialsError } from '../../domain/errors/invalid-credentials.error.js';
 import { InvalidUsernameError } from '../../domain/errors/invalid-username.error.js';
 import type { PasswordHasher } from '../ports/out/password-hasher.port.js';
@@ -11,14 +11,12 @@ export interface AuthenticateAdminInput {
   password: string;
 }
 
-const TIMING_DUMMY_HASH =
-  '$argon2id$v=19$m=65536,t=3,p=4$abcdefghijklmnopqrstuv$abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqr';
-
 export class AuthenticateAdmin {
   constructor(
     private readonly adminRepo: AdminRepository,
     private readonly passwordHasher: PasswordHasher,
     private readonly tokenSigner: TokenSigner,
+    private readonly dummyPasswordHash: PasswordHash,
   ) {}
 
   async execute(input: AuthenticateAdminInput): Promise<SignedToken> {
@@ -35,7 +33,7 @@ export class AuthenticateAdmin {
     const admin = await this.adminRepo.findByUsername(username);
 
     if (!admin) {
-      await this.passwordHasher.verify(input.password, PasswordHash.fromHash(TIMING_DUMMY_HASH));
+      await this.passwordHasher.verify(input.password, this.dummyPasswordHash);
       throw new InvalidCredentialsError();
     }
 

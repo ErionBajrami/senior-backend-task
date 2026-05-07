@@ -7,6 +7,7 @@ export interface JwtSignerConfig {
   secret: string;
   ttlSeconds: number;
   issuer: string;
+  audience: string;
 }
 
 export class JwtTokenSigner implements TokenSigner {
@@ -24,6 +25,7 @@ export class JwtTokenSigner implements TokenSigner {
         iat: Math.floor(now.getTime() / 1000),
         exp: Math.floor(expiresAt.getTime() / 1000),
         iss: this.config.issuer,
+        aud: this.config.audience,
       },
       this.config.secret,
       { algorithm: 'HS256' },

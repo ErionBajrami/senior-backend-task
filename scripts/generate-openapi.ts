@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { extendZodWithOpenApi, OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import type { HeadersObject } from '@asteasolutions/zod-to-openapi/dist/types.js';
 import { z } from 'zod';
 import yaml from 'yaml';
 
@@ -10,6 +11,7 @@ extendZodWithOpenApi(z);
 import {
   CreateLinkBody,
   LinkIdParam,
+  LinkListQuery,
   LinkListResponse,
   LinkResponse,
   UpdateLinkBody,
@@ -51,24 +53,39 @@ const idParam = LinkIdParam.shape.id.openapi({
 interface JsonResponse {
   description: string;
   content: { 'application/json': { schema: z.ZodTypeAny } };
+  headers?: HeadersObject;
 }
 
-function jsonResponse(description: string, schema: z.ZodTypeAny): JsonResponse {
+function jsonResponse(
+  description: string,
+  schema: z.ZodTypeAny,
+  headers?: HeadersObject,
+): JsonResponse {
   return {
     description,
     content: { 'application/json': { schema } },
+    ...(headers ? { headers } : {}),
   };
 }
 
 const errorJson = (description: string): JsonResponse => jsonResponse(description, ErrorRef);
+
+const totalCountHeader: HeadersObject = {
+  'x-total-count': {
+    description: 'Total number of records matching the query (independent of limit/offset)',
+    schema: { type: 'integer', minimum: 0 },
+  },
+};
 
 registry.registerPath({
   method: 'get',
   path: '/v1/links',
   summary: 'List active links (public)',
   tags: ['Public'],
+  request: { query: LinkListQuery },
   responses: {
-    200: jsonResponse('Active links', LinkList),
+    200: jsonResponse('Active links', LinkList, totalCountHeader),
+    422: errorJson('Invalid limit or offset'),
   },
 });
 
@@ -124,9 +141,11 @@ registry.registerPath({
   summary: 'List ALL links, including soft-deleted (admin)',
   tags: ['Admin'],
   security: bearerSecurity,
+  request: { query: LinkListQuery },
   responses: {
-    200: jsonResponse('Every link, regardless of isActive', LinkList),
+    200: jsonResponse('Every link, regardless of isActive', LinkList, totalCountHeader),
     401: errorJson('Missing or invalid Bearer token'),
+    422: errorJson('Invalid limit or offset'),
   },
 });
 

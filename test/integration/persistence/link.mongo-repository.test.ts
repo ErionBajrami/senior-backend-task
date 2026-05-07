@@ -95,4 +95,48 @@ describe('MongoLinkRepository (integration)', () => {
     const found = await repo.findById(link.id);
     expect(found?.clickCount).toBe(25);
   });
+
+  it('does not increment the counter on an inactive link', async () => {
+    const link = makeLink({ isActive: false });
+    await repo.save(link);
+
+    await repo.incrementClickCount(link.id);
+
+    const found = await repo.findById(link.id);
+    expect(found?.clickCount).toBe(0);
+  });
+
+  it('paginates findAllActive with limit/offset preserving sort order', async () => {
+    const titles = ['A', 'B', 'C', 'D', 'E'];
+    for (let i = 0; i < titles.length; i++) {
+      const link = Link.create({
+        id: LinkId.generate(),
+        title: LinkTitle.create(titles[i] ?? ''),
+        url: Url.create(`https://example.com/${i.toString()}`),
+        description: null,
+        displayOrder: i,
+        now: T0,
+      });
+      await repo.save(link);
+    }
+    const inactive = makeLink({ title: 'Z', isActive: false });
+    await repo.save(inactive);
+
+    const page1 = await repo.findAllActive({ limit: 2, offset: 0 });
+    const page2 = await repo.findAllActive({ limit: 2, offset: 2 });
+    const page3 = await repo.findAllActive({ limit: 2, offset: 4 });
+
+    expect(page1.map((l) => l.title.value)).toEqual(['A', 'B']);
+    expect(page2.map((l) => l.title.value)).toEqual(['C', 'D']);
+    expect(page3.map((l) => l.title.value)).toEqual(['E']);
+  });
+
+  it('countAllActive excludes inactive links; countAll includes them', async () => {
+    await repo.save(makeLink({ title: 'A' }));
+    await repo.save(makeLink({ title: 'B' }));
+    await repo.save(makeLink({ title: 'Z', isActive: false }));
+
+    expect(await repo.countAllActive()).toBe(2);
+    expect(await repo.countAll()).toBe(3);
+  });
 });

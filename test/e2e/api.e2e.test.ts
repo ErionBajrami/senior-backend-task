@@ -254,6 +254,82 @@ describe('Quanos E2E', () => {
       expect(res.statusCode).toBe(422);
     });
 
+    it('POST with javascript: URL scheme returns 422', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v1/admin/links',
+        headers: authHeader(),
+        payload: { title: 'X', url: 'javascript:alert(1)' },
+      });
+      expect(res.statusCode).toBe(422);
+    });
+
+    it('POST with data: iconUrl scheme returns 422', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v1/admin/links',
+        headers: authHeader(),
+        payload: {
+          title: 'X',
+          url: 'https://x.com',
+          iconUrl: 'data:text/html,<script>alert(1)</script>',
+        },
+      });
+      expect(res.statusCode).toBe(422);
+    });
+
+    describe('pagination', () => {
+      async function seed(n: number): Promise<void> {
+        for (let i = 0; i < n; i++) {
+          await app.inject({
+            method: 'POST',
+            url: '/v1/admin/links',
+            headers: authHeader(),
+            payload: {
+              title: `Link${i.toString().padStart(2, '0')}`,
+              url: `https://example.com/${i.toString()}`,
+              displayOrder: i,
+            },
+          });
+        }
+      }
+
+      it('GET /v1/links?limit=2&offset=1 returns 2 items and X-Total-Count', async () => {
+        await seed(5);
+        const res = await app.inject({ method: 'GET', url: '/v1/links?limit=2&offset=1' });
+        expect(res.statusCode).toBe(200);
+        expect(res.headers['x-total-count']).toBe('5');
+        const body = res.json<{ title: string }[]>();
+        expect(body.map((l) => l.title)).toEqual(['Link01', 'Link02']);
+      });
+
+      it('GET /v1/links without query returns all and X-Total-Count = items.length', async () => {
+        await seed(3);
+        const res = await app.inject({ method: 'GET', url: '/v1/links' });
+        expect(res.statusCode).toBe(200);
+        expect(res.headers['x-total-count']).toBe('3');
+        expect(res.json<unknown[]>()).toHaveLength(3);
+      });
+
+      it('GET /v1/links?limit=0 returns 422', async () => {
+        const res = await app.inject({ method: 'GET', url: '/v1/links?limit=0' });
+        expect(res.statusCode).toBe(422);
+      });
+
+      it('GET /v1/admin/links?limit=2&offset=2 returns the next 2 with admin auth', async () => {
+        await seed(5);
+        const res = await app.inject({
+          method: 'GET',
+          url: '/v1/admin/links?limit=2&offset=2',
+          headers: authHeader(),
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.headers['x-total-count']).toBe('5');
+        const body = res.json<{ title: string }[]>();
+        expect(body.map((l) => l.title)).toEqual(['Link02', 'Link03']);
+      });
+    });
+
     it('POST with empty title returns 422', async () => {
       const res = await app.inject({
         method: 'POST',

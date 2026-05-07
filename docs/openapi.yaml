@@ -242,13 +242,41 @@ paths:
       summary: List active links (public)
       tags:
         - Public
+      parameters:
+        - schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: integer
+            nullable: true
+            minimum: 0
+          required: false
+          name: offset
+          in: query
       responses:
         "200":
           description: Active links
+          headers: &a1
+            x-total-count:
+              description: Total number of records matching the query (independent of
+                limit/offset)
+              schema:
+                type: integer
+                minimum: 0
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LinkList"
+        "422":
+          description: Invalid limit or offset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /v1/links/{id}:
     get:
       summary: Get one active link by id (public)
@@ -348,11 +376,27 @@ paths:
       summary: List ALL links, including soft-deleted (admin)
       tags:
         - Admin
-      security: &a1
+      security: &a2
         - BearerAuth: []
+      parameters:
+        - schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: integer
+            nullable: true
+            minimum: 0
+          required: false
+          name: offset
+          in: query
       responses:
         "200":
           description: Every link, regardless of isActive
+          headers: *a1
           content:
             application/json:
               schema:
@@ -363,11 +407,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "422":
+          description: Invalid limit or offset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     post:
       summary: Create a link (admin)
       tags:
         - Admin
-      security: *a1
+      security: *a2
       requestBody:
         required: true
         content:
@@ -398,7 +448,7 @@ paths:
       summary: Get a link by id, regardless of isActive (admin)
       tags:
         - Admin
-      security: *a1
+      security: *a2
       parameters:
         - schema:
             type: string
@@ -439,7 +489,7 @@ paths:
         Setting `isActive: false` is the same as DELETE."
       tags:
         - Admin
-      security: *a1
+      security: *a2
       parameters:
         - schema:
             type: string
@@ -486,7 +536,7 @@ paths:
         timestamps are kept. Re-activate by PUT-ing `{ "isActive": true }`.'
       tags:
         - Admin
-      security: *a1
+      security: *a2
       parameters:
         - schema:
             type: string

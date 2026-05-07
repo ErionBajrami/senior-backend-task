@@ -54,6 +54,7 @@ export async function buildTestApp(): Promise<TestApp> {
     JWT_SECRET: 'a'.repeat(40),
     JWT_TTL_SECONDS: 3600,
     JWT_ISSUER: 'quanos-e2e',
+    JWT_AUDIENCE: 'quanos-e2e-admin',
     ADMIN_USERNAME: TEST_ADMIN_USERNAME,
     ADMIN_PASSWORD: TEST_ADMIN_PASSWORD,
     RATE_LIMIT_MAX: 1000,
@@ -62,11 +63,11 @@ export async function buildTestApp(): Promise<TestApp> {
     REQUEST_ID_HEADER: 'x-request-id',
   };
 
-  const composed = composeApp({ db, env });
-
   const loggerConfig = { level: env.LOG_LEVEL, prettyPrint: false };
   const logger = createLogger(loggerConfig);
   const loggerOptions = createLoggerOptions(loggerConfig);
+
+  const composed = await composeApp({ db, env, logger });
 
   await seedAdmin({
     adminRepo: composed.adminRepo,

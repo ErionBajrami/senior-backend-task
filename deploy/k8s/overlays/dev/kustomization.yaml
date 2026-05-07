@@ -20,6 +20,13 @@ patches:
       kind: NetworkPolicy
       metadata:
         name: quanos
+  - target:
+      kind: Deployment
+      name: quanos
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
 
 images:
   - name: ghcr.io/quanos/quanos

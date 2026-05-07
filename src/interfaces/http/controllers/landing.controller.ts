@@ -21,8 +21,8 @@ export async function registerLandingRoutes(
   });
 
   app.get('/', async (_req, reply) => {
-    const links = await deps.listActiveLinks.execute();
-    const html = renderLandingPage(links);
+    const { items } = await deps.listActiveLinks.execute();
+    const html = renderLandingPage(items);
     return reply.type('text/html; charset=utf-8').header('cache-control', 'no-store').send(html);
   });
 }
