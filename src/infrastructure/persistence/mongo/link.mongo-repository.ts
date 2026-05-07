@@ -8,8 +8,7 @@ export const LINKS_COLLECTION = 'links';
 
 const DISPLAY_SORT = { displayOrder: 1, createdAt: 1, _id: 1 } as const;
 
-export class MongoLinkRepository implements LinkRepo
-sitory {
+export class MongoLinkRepository implements LinkRepository {
   private readonly collection: Collection<LinkDoc>;
 
   constructor(db: Db) {
