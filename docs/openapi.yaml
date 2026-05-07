@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: Quanos API
+  version: 0.1.0
+  description: Public + admin API for managing and following configured links.
+    Built with Node.js + TypeScript on a Clean Architecture layout,
+    MongoDB-backed, JWT auth.
+servers:
+  - url: http://localhost:3000
+    description: local API
+  - url: http://localhost:3001
+    description: local ops (health endpoints only)
+tags:
+  - name: Public
+    description: Routes any visitor can call
+  - name: Auth
+    description: Login + token issuance
+  - name: Admin
+    description: CRUD over links — Bearer JWT required
+  - name: Ops
+    description: Liveness + readiness probes (port 3001)
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Link:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        url:
+          type: string
+        description:
+          type: string
+          nullable: true
+        iconUrl:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        displayOrder:
+          type: integer
+          minimum: 0
+        isActive:
+          type: boolean
+        clickCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - url
+        - description
+        - iconUrl
+        - category
+        - displayOrder
+        - isActive
+        - clickCount
+        - createdAt
+        - updatedAt
+    LinkList:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          title:
+            type: string
+          url:
+            type: string
+          description:
+            type: string
+            nullable: true
+          iconUrl:
+            type: string
+            nullable: true
+          category:
+            type: string
+            nullable: true
+          displayOrder:
+            type: integer
+            minimum: 0
+          isActive:
+            type: boolean
+          clickCount:
+            type: integer
+            minimum: 0
+          createdAt:
+            type: string
+            format: date-time
+          updatedAt:
+            type: string
+            format: date-time
+        required:
+          - id
+          - title
+          - url
+          - description
+          - iconUrl
+          - category
+          - displayOrder
+          - isActive
+          - clickCount
+          - createdAt
+          - updatedAt
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              message:
+                type: string
+            required:
+              - path
+              - message
+      required:
+        - code
+        - message
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    CreateLinkBody:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        url:
+          type: string
+          maxLength: 2048
+          format: uri
+        description:
+          type: string
+          nullable: true
+          maxLength: 2000
+        iconUrl:
+          type: string
+          nullable: true
+          maxLength: 2048
+          format: uri
+        category:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 50
+        displayOrder:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+      required:
+        - title
+        - url
+    UpdateLinkBody:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        url:
+          type: string
+          maxLength: 2048
+          format: uri
+        description:
+          type: string
+          nullable: true
+          maxLength: 2000
+        iconUrl:
+          type: string
+          nullable: true
+          maxLength: 2048
+          format: uri
+        category:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 50
+        displayOrder:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+        isActive:
+          type: boolean
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 100
+        password:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+        - username
+        - password
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+        - token
+        - expiresAt
+  parameters: {}
+paths:
+  /v1/links:
+    get:
+      summary: List active links (public)
+      tags:
+        - Public
+      responses:
+        "200":
+          description: Active links
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkList"
+  /v1/links/{id}:
+    get:
+      summary: Get one active link by id (public)
+      tags:
+        - Public
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: UUID v4 of the link
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        "200":
+          description: Link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "404":
+          description: Link not found or inactive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Invalid id format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /go/{id}:
+    get:
+      summary: Jump (302 redirect + click count)
+      description: Increments the click counter atomically and 302-redirects to the
+        link URL. Returns 404 if the link is missing or has been soft-deleted.
+      tags:
+        - Public
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: UUID v4 of the link
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        "302":
+          description: Redirect to the configured URL
+        "404":
+          description: Link not found or inactive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Invalid id format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/auth/login:
+    post:
+      summary: Authenticate as the admin and receive a JWT
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Signed token + expiry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Malformed body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/admin/links:
+    get:
+      summary: List ALL links, including soft-deleted (admin)
+      tags:
+        - Admin
+      security: &a1
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Every link, regardless of isActive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LinkList"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a link (admin)
+      tags:
+        - Admin
+      security: *a1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLinkBody"
+      responses:
+        "201":
+          description: Created link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation failed (title, url, or description)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/admin/links/{id}:
+    get:
+      summary: Get a link by id, regardless of isActive (admin)
+      tags:
+        - Admin
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: UUID v4 of the link
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        "200":
+          description: Link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Link not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Invalid id format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Partial update of a link (admin)
+      description: "Each field is optional. Sending `description: null` clears it.
+        Setting `isActive: false` is the same as DELETE."
+      tags:
+        - Admin
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: UUID v4 of the link
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLinkBody"
+      responses:
+        "200":
+          description: Updated link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Link not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Soft-delete a link (admin)
+      description: 'Marks `isActive=false`. The row is preserved; the click count and
+        timestamps are kept. Re-activate by PUT-ing `{ "isActive": true }`.'
+      tags:
+        - Admin
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            description: UUID v4 of the link
+            example: 550e8400-e29b-41d4-a716-446655440000
+          required: true
+          name: id
+          in: path
+      responses:
+        "204":
+          description: Soft-deleted (no body)
+        "401":
+          description: Missing or invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Link not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Invalid id format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /healthz:
+    get:
+      summary: Liveness probe (ops port)
+      description: Returns 200 unconditionally. Does NOT touch Mongo — kubelet must
+        not SIGKILL the pod for transient DB outages.
+      tags:
+        - Ops
+      responses:
+        "200":
+          description: Always healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /readyz:
+    get:
+      summary: Readiness probe (ops port)
+      description: Pings Mongo with a hard timeout. 503 means the pod will be removed
+        from the Service endpoints until it recovers — without a container
+        restart.
+      tags:
+        - Ops
+      responses:
+        "200":
+          description: Mongo reachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "503":
+          description: Mongo unreachable or slow
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
