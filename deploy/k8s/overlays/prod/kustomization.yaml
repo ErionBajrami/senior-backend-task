@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: quanos
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+patches:
+  - path: patch-replicas.yaml
+  - path: patch-resources.yaml
+
+images:
+  - name: ghcr.io/quanos/quanos
+    newTag: latest

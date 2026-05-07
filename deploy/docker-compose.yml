@@ -1,0 +1,51 @@
+name: quanos
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: quanos-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.runCommand({ping: 1}).ok || quit(1)']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+    image: quanos:dev
+    container_name: quanos-app
+    ports:
+      - '3000:3000'
+      - '3001:3001'
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: info
+      PORT: 3000
+      OPS_PORT: 3001
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB_NAME: quanos
+      MONGO_TIMEOUT_MS: 5000
+      JWT_SECRET: ${JWT_SECRET:-development-secret-of-at-least-32-chars-long}
+      JWT_TTL_SECONDS: 3600
+      JWT_ISSUER: quanos
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-please}
+      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_TIME_WINDOW: '1 minute'
+      CORS_ORIGINS: ''
+      REQUEST_ID_HEADER: x-request-id
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mongo-data:

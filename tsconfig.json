@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "outDir": "dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@domain/*": ["src/domain/*"],
+      "@application/*": ["src/application/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@interfaces/*": ["src/interfaces/*"],
+      "@main/*": ["src/main/*"]
+    },
+
+    "sourceMap": true,
+    "declaration": false,
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsc.tsbuildinfo"
+  },
+  "include": ["src/**/*", "test/**/*", "scripts/**/*"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}

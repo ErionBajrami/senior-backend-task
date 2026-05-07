@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quanos
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: quanos
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: quanos
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: quanos
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: ghcr.io/quanos/quanos:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+            - name: ops
+              containerPort: 3001
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: quanos-config
+            - secretRef:
+                name: quanos-secret
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop: ['ALL']
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: ops
+            periodSeconds: 10
+            failureThreshold: 6
+            timeoutSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: ops
+            periodSeconds: 5
+            failureThreshold: 3
+            timeoutSeconds: 2
+          startupProbe:
+            httpGet:
+              path: /readyz
+              port: ops
+            failureThreshold: 30
+            periodSeconds: 2

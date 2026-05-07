@@ -1,0 +1,46 @@
+# Dependencies — re-installed inside the container.
+node_modules
+
+# Build artifacts — produced inside the container.
+dist
+coverage
+.cache
+*.tsbuildinfo
+
+# Source control & IDE.
+.git
+.gitignore
+.github
+.vscode
+.idea
+.editorconfig
+
+# Environment files — secrets must come from K8s Secrets / env vars, not
+# baked into the image.
+.env
+.env.*
+!.env.example
+
+# Logs.
+*.log
+
+# Tests + docs aren't needed at runtime.
+test
+docs
+
+# Build/dev assets that don't belong in the runtime image.
+deploy
+scripts
+.eslintcache
+.prettierignore
+.prettierrc.json
+.dependency-cruiser.cjs
+eslint.config.js
+vitest.config.ts
+README.md
+LICENSE
+# `tsup.config.ts` is needed by the build stage — do NOT add it here.
+
+# Docker files themselves.
+.dockerignore
+Dockerfile*

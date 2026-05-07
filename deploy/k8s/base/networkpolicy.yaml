@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: quanos
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: quanos
+      app.kubernetes.io/component: api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from the cluster's nginx ingress controller and from
+    # any monitoring namespace. Tighten/loosen via overlays per cluster.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3001
+  egress:
+    # DNS — required for hostname resolution.
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mongo
+      ports:
+        - protocol: TCP
+          port: 27017

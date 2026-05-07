@@ -1,0 +1,33 @@
+version: 2
+updates:
+  # Application JS/TS deps. Patch + minor bumps grouped into one PR per week
+  # so the inbox doesn't fill with one-PR-per-package noise.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      patch-and-minor:
+        update-types:
+          - patch
+          - minor
+        applies-to: version-updates
+      security:
+        applies-to: security-updates
+
+  # Distroless / Debian base images in the Dockerfile. Refresh weekly so
+  # upstream CVE fixes flow through without manual intervention.
+  - package-ecosystem: docker
+    directory: /deploy/docker
+    schedule:
+      interval: weekly
+      day: monday
+
+  # GitHub Actions versions. Pin-by-tag with auto-update.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday

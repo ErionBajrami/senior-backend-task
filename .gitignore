@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Test artifacts
+coverage/
+.nyc_output/
+.vitest-cache/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caches
+.eslintcache
+.cache/
+
+# OpenAPI generated artifact tracked, but if regenerated locally and dirty, ignore staging copy
+docs/openapi.local.yaml
+
+# Generated dependency-cruiser graph artifact
+dependency-graph.svg

@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: quanos-dev
+
+resources:
+  - namespace.yaml
+  - ../../base
+  - secret.yaml
+  - dev-mongo.yaml
+
+patches:
+  - path: patch-replicas.yaml
+  - target:
+      kind: NetworkPolicy
+      name: quanos
+    patch: |-
+      $patch: delete
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: quanos
+
+images:
+  - name: ghcr.io/quanos/quanos
+    newName: quanos
+    newTag: dev

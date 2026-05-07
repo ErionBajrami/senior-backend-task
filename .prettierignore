@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.cache/
+.claude/
+*.tsbuildinfo
+package-lock.json
+docs/openapi.yaml
+dependency-graph.svg

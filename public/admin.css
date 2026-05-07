@@ -1,0 +1,266 @@
+/* Admin-page-specific styles. Loaded ON TOP of styles.css so cards/header still match. */
+
+main {
+  max-width: 960px;
+}
+
+.topbar {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem 0;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.back-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateX(-2px);
+}
+
+.back-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.back-link span[aria-hidden] {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+section {
+  margin-bottom: 2.5rem;
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+form {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+#login-form {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.toolbar h2 {
+  margin: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field span {
+  font-weight: 500;
+}
+
+.field span em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  margin-left: 0.25rem;
+}
+
+.field input,
+.field textarea,
+.field select {
+  font: inherit;
+  padding: 0.5rem 0.625rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.field.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  grid-column: 1 / -1;
+}
+
+.field.checkbox input {
+  width: auto;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: white;
+  border: 0;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button:hover {
+  filter: brightness(1.08);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button.secondary {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
+button.danger {
+  background: transparent;
+  color: #c62828;
+  border: 1px solid var(--border);
+}
+
+button.danger:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  button.danger {
+    color: #ff8a80;
+  }
+}
+
+.error {
+  margin-top: 0.75rem;
+  color: #c62828;
+  font-size: 0.875rem;
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .error {
+    color: #ff8a80;
+  }
+}
+
+.error:not(:empty) {
+  display: block;
+}
+
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+th,
+td {
+  padding: 0.625rem 0.875rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+td a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+td a:hover {
+  text-decoration: underline;
+}
+
+td.actions {
+  white-space: nowrap;
+  display: flex;
+  gap: 0.375rem;
+}
+
+td.actions button {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+}
+
+td.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem;
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
