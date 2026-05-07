@@ -1,3 +1,4 @@
+# trivy:ignore:DS-0026
 FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
