@@ -1,0 +1,2 @@
+# Ignore missing HEALTHCHECK in Dockerfile since distroless doesn't have a shell/curl, and orchestration (K8s/Compose) handles it.
+deploy/docker/Dockerfile: DS-0026

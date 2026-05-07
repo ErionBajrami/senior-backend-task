@@ -26,8 +26,6 @@ const EnvSchema = z.object({
   REQUEST_ID_HEADER: z.string().default('x-request-id'),
 });
 
-
-
 // const EnvSchema = z.object({
 //   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 //   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error', 'fatal', 'silent']).default('info'),
@@ -59,7 +57,6 @@ const EnvSchema = z.object({
 
 //   REQUEST_ID_HEADER: z.string().default('x-request-id'),
 // });
-
 
 export type Env = z.infer<typeof EnvSchema>;
 
